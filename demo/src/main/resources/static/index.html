@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>My Game Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+          --bg: #0a0a0f;
+          --surface: #13131a;
+          --card: #1a1a24;
+          --border: #2a2a3a;
+          --accent: #e8ff47;
+          --accent2: #ff4757;
+          --text: #e8e8f0;
+          --muted: #6b6b80;
+          --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          min-height: 100vh;
+          overflow-x: hidden;
+        }
+
+        body::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+          pointer-events: none;
+          z-index: 0;
+          opacity: 0.4;
+        }
+
+        header {
+          position: relative;
+          z-index: 1;
+          padding: 48px 64px 32px;
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .logo-title {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 56px;
+          letter-spacing: 4px;
+          line-height: 1;
+        }
+
+        .logo-title span { color: var(--accent); }
+
+        .logo-sub {
+          font-size: 13px;
+          color: var(--muted);
+          letter-spacing: 3px;
+          text-transform: uppercase;
+          margin-top: 4px;
+        }
+
+        .game-count {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 48px;
+          color: var(--accent);
+          line-height: 1;
+          text-align: right;
+        }
+
+        .game-count-label {
+          font-size: 12px;
+          color: var(--muted);
+          text-transform: uppercase;
+          letter-spacing: 2px;
+        }
+
+        .btn {
+          padding: 12px 24px;
+          border-radius: var(--radius);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          border: none;
+          transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+          background: var(--accent);
+          color: #0a0a0f;
+        }
+
+        .btn-primary:hover {
+          background: #d4eb30;
+          transform: translateY(-1px);
+          box-shadow: 0 8px 24px rgba(232,255,71,0.25);
+        }
+
+        .btn-danger {
+          background: transparent;
+          color: var(--accent2);
+          border: 1px solid var(--accent2);
+          padding: 8px 16px;
+          font-size: 13px;
+        }
+
+        .btn-danger:hover { background: var(--accent2); color: white; }
+
+        .btn-edit {
+          background: transparent;
+          color: var(--accent);
+          border: 1px solid var(--accent);
+          padding: 8px 16px;
+          font-size: 13px;
+        }
+
+        .btn-edit:hover { background: var(--accent); color: #0a0a0f; }
+
+        main {
+          position: relative;
+          z-index: 1;
+          padding: 48px 64px;
+        }
+
+        .games-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 24px;
+        }
+
+        .game-card {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          overflow: hidden;
+          transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+          animation: fadeUp 0.4s ease both;
+        }
+
+        .game-card:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 20px 48px rgba(0,0,0,0.4);
+          border-color: var(--accent);
+        }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-thumb {
+          height: 160px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .card-thumb::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg,
+            hsl(var(--hue, 260), 60%, 20%),
+            hsl(calc(var(--hue, 260) + 40), 50%, 10%)
+          );
+        }
+
+        .card-thumb-icon {
+          font-size: 48px;
+          position: relative;
+          z-index: 1;
+          filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+        }
+
+        .card-rating-badge {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: var(--accent);
+          color: #0a0a0f;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 20px;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1;
+        }
+
+        .card-body { padding: 20px; }
+
+        .card-genre {
+          font-size: 11px;
+          color: var(--accent);
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          margin-bottom: 8px;
+          font-weight: 500;
+        }
+
+        .card-name {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 24px;
+          letter-spacing: 1px;
+          margin-bottom: 8px;
+          line-height: 1.1;
+        }
+
+        .card-note {
+          font-size: 13px;
+          color: var(--muted);
+          margin-bottom: 16px;
+          min-height: 18px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .card-platforms {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 16px;
+          min-height: 24px;
+        }
+
+        .platform-tag {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          color: var(--muted);
+          font-size: 11px;
+          padding: 3px 10px;
+          border-radius: 20px;
+        }
+
+        .card-actions { display: flex; gap: 8px; }
+
+        .empty-state {
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: 80px 0;
+          color: var(--muted);
+        }
+
+        .empty-state-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.4; }
+
+        .empty-state h3 {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 32px;
+          letter-spacing: 2px;
+          color: var(--text);
+          opacity: 0.4;
+          margin-bottom: 8px;
+        }
+
+        .modal-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.75);
+          backdrop-filter: blur(8px);
+          z-index: 100;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          padding: 40px;
+          width: 480px;
+          max-width: 90vw;
+          animation: modalIn 0.25s ease;
+        }
+
+        @keyframes modalIn {
+          from { opacity: 0; transform: scale(0.95) translateY(10px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-title {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 32px;
+          letter-spacing: 2px;
+          margin-bottom: 28px;
+          color: var(--accent);
+        }
+
+        .form-group { margin-bottom: 20px; }
+
+        .form-group label {
+          display: block;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          color: var(--muted);
+          margin-bottom: 8px;
+        }
+
+        .form-group input {
+          width: 100%;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 12px 16px;
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 14px;
+          transition: border-color 0.2s;
+          outline: none;
+        }
+
+        .form-group input:focus { border-color: var(--accent); }
+        .form-group input::placeholder { color: var(--muted); }
+
+        .form-error {
+          font-size: 12px;
+          color: var(--accent2);
+          margin-top: 6px;
+          display: none;
+        }
+
+        .modal-actions {
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+          margin-top: 28px;
+        }
+
+        .btn-cancel {
+          background: transparent;
+          color: var(--muted);
+          border: 1px solid var(--border);
+          padding: 12px 24px;
+        }
+
+        .btn-cancel:hover { color: var(--text); border-color: var(--muted); }
+
+        .toast {
+          position: fixed;
+          bottom: 32px;
+          right: 32px;
+          background: var(--card);
+          border: 1px solid var(--accent);
+          color: var(--text);
+          padding: 16px 24px;
+          border-radius: var(--radius);
+          font-size: 14px;
+          z-index: 999;
+          transform: translateY(80px);
+          opacity: 0;
+          transition: all 0.3s ease;
+        }
+
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.error { border-color: var(--accent2); }
+
+        .loading {
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: 80px 0;
+          color: var(--muted);
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 24px;
+          letter-spacing: 4px;
+        }
+
+        @media (max-width: 768px) {
+          header { padding: 32px 24px 24px; flex-direction: column; align-items: flex-start; gap: 20px; }
+          main { padding: 32px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <div class="logo-title">MY <span>GAME</span> LIBRARY</div>
+        <div class="logo-sub">Personal Collection Tracker</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:32px;">
+        <div>
+            <div class="game-count" id="gameCount">0</div>
+            <div class="game-count-label">Games Tracked</div>
+        </div>
+        <button class="btn btn-primary" onclick="openAddModal()">+ Add Game</button>
+    </div>
+</header>
+
+<main>
+    <div class="games-grid" id="gamesGrid">
+        <div class="loading">Loading your library</div>
+    </div>
+</main>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-title" id="modalTitle">Add New Game</div>
+        <input type="hidden" id="editGameId"/>
+
+        <div class="form-group">
+            <label>Game Name *</label>
+            <input type="text" id="gameName" placeholder="e.g. Red Dead Redemption 2"/>
+            <div class="form-error" id="nameError"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Genre *</label>
+            <input type="text" id="gameGenre" placeholder="e.g. Action/RPG"/>
+            <div class="form-error" id="genreError"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Rating (1–10) *</label>
+            <input type="number" id="gameRating" placeholder="8" min="1" max="10"/>
+            <div class="form-error" id="ratingError"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Personal Note</label>
+            <input type="text" id="gameNote" placeholder="e.g. Best game I've ever played"/>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitGame()">Save Game</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const API = '';  // empty = same origin (Spring Boot serves this file)
+
+    const GENRE_ICONS = {
+      'action': '⚔️', 'rpg': '🧙', 'sports': '⚽', 'racing': '🏎️',
+      'horror': '👻', 'adventure': '🗺️', 'puzzle': '🧩', 'strategy': '♟️',
+      'shooter': '🔫', 'simulation': '🏗️', 'fighting': '🥊', 'platformer': '🎮'
+    };
+
+    const HUES = [260, 200, 30, 150, 320, 180, 45, 290];
+
+    function getIcon(genre) {
+      if (!genre) return '🎮';
+      const g = genre.toLowerCase();
+      for (const [key, icon] of Object.entries(GENRE_ICONS)) {
+        if (g.includes(key)) return icon;
+      }
+      return '🎮';
+    }
+
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => t.className = 'toast', 3000);
+    }
+
+    async function loadGames() {
+      const grid = document.getElementById('gamesGrid');
+      try {
+        const res = await fetch(`${API}/games`);
+        const games = await res.json();
+        document.getElementById('gameCount').textContent = games.length;
+        if (games.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🎮</div>
+              <h3>No Games Yet</h3>
+              <p>Add your first game to start your library</p>
+            </div>`;
+          return;
+        }
+        grid.innerHTML = games.map((g, i) => renderCard(g, i)).join('');
+      } catch (e) {
+        grid.innerHTML = `<div class="empty-state"><h3>Could not load games</h3><p>Make sure your Spring Boot server is running</p></div>`;
+      }
+    }
+
+    function renderCard(game, index) {
+      const hue = HUES[index % HUES.length];
+      const icon = getIcon(game.genre);
+      const platforms = (game.platforms || []).map(p => `<span class="platform-tag">${p.name}</span>`).join('');
+      const safeName = game.name.replace(/'/g, "\\'");
+      return `
+        <div class="game-card" style="animation-delay:${index * 0.05}s">
+          <div class="card-thumb" style="--hue:${hue}">
+            <div class="card-thumb-icon">${icon}</div>
+            <div class="card-rating-badge">${game.rating}</div>
+          </div>
+          <div class="card-body">
+            <div class="card-genre">${game.genre || 'Unknown Genre'}</div>
+            <div class="card-name">${game.name}</div>
+            <div class="card-note">${game.customNote || '—'}</div>
+            <div class="card-platforms">${platforms}</div>
+            <div class="card-actions">
+              <button class="btn btn-edit" onclick="openEditModal(${game.id})">Edit</button>
+              <button class="btn btn-danger" onclick="deleteGame(${game.id}, '${safeName}')">Delete</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Add New Game';
+      document.getElementById('editGameId').value = '';
+      document.getElementById('gameName').value = '';
+      document.getElementById('gameGenre').value = '';
+      document.getElementById('gameRating').value = '';
+      document.getElementById('gameNote').value = '';
+      clearErrors();
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    async function openEditModal(id) {
+      try {
+        const res = await fetch(`${API}/games/${id}`);
+        const game = await res.json();
+        document.getElementById('modalTitle').textContent = 'Edit Game';
+        document.getElementById('editGameId').value = game.id;
+        document.getElementById('gameName').value = game.name;
+        document.getElementById('gameGenre').value = game.genre;
+        document.getElementById('gameRating').value = game.rating;
+        document.getElementById('gameNote').value = game.customNote || '';
+        clearErrors();
+        document.getElementById('modalOverlay').classList.add('active');
+      } catch (e) {
+        showToast('Could not load game details', true);
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('active');
+    }
+
+    function clearErrors() {
+      ['nameError','genreError','ratingError'].forEach(id => {
+        const el = document.getElementById(id);
+        el.style.display = 'none';
+        el.textContent = '';
+      });
+    }
+
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    async function submitGame() {
+      clearErrors();
+      const id = document.getElementById('editGameId').value;
+      const name = document.getElementById('gameName').value.trim();
+      const genre = document.getElementById('gameGenre').value.trim();
+      const rating = parseInt(document.getElementById('gameRating').value);
+      const customNote = document.getElementById('gameNote').value.trim();
+
+      let hasError = false;
+      if (!name) { showError('nameError', 'Name is required'); hasError = true; }
+      if (!genre) { showError('genreError', 'Genre is required'); hasError = true; }
+      if (!rating || rating < 1 || rating > 10) { showError('ratingError', 'Rating must be between 1 and 10'); hasError = true; }
+      if (hasError) return;
+
+      const payload = { name, genre, rating, customNote };
+      const isEdit = !!id;
+      const url = isEdit ? `${API}/games/${id}` : `${API}/games`;
+      const method = isEdit ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.text();
+          showToast(err || 'Something went wrong', true);
+          return;
+        }
+
+        closeModal();
+        showToast(isEdit ? `${name} updated!` : `${name} added to your library!`);
+        loadGames();
+      } catch (e) {
+        showToast('Could not connect to server', true);
+      }
+    }
+
+    async function deleteGame(id, name) {
+      if (!confirm(`Delete "${name}" from your library?`)) return;
+      try {
+        await fetch(`${API}/games/${id}`, { method: 'DELETE' });
+        showToast(`${name} removed from library`);
+        loadGames();
+      } catch (e) {
+        showToast('Could not delete game', true);
+      }
+    }
+
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    loadGames();
+</script>
+</body>
+</html>
