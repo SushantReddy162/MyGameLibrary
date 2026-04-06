@@ -4,12 +4,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
 
+@Component
 public class JwtUtil {
-    private final String SECRET_KEY = "f2babc1a-a48f-4066-bba5-08b4a7579e77";
+    private final String SECRET_KEY = "dGhpcyBpcyBhIHZlcnkgbG9uZyBzZWNyZXQga2V5IGZvciBqd3Qgc2lnbmluZw==";
 
     public String generateToken( String username){
         return Jwts.builder()
