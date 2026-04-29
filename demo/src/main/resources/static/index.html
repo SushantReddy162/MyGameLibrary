@@ -471,25 +471,23 @@
     }
 
     async function loadGames() {
-      const grid = document.getElementById('gamesGrid');
-      try {
-        const res = await fetch(`${API}/games`);
+    const grid = document.getElementById('gamesGrid');
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch('/games', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
         const games = await res.json();
         document.getElementById('gameCount').textContent = games.length;
         if (games.length === 0) {
-          grid.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-state-icon">🎮</div>
-              <h3>No Games Yet</h3>
-              <p>Add your first game to start your library</p>
-            </div>`;
-          return;
+            grid.innerHTML = `<div class="empty-state">...</div>`;
+            return;
         }
         grid.innerHTML = games.map((g, i) => renderCard(g, i)).join('');
-      } catch (e) {
-        grid.innerHTML = `<div class="empty-state"><h3>Could not load games</h3><p>Make sure your Spring Boot server is running</p></div>`;
-      }
+    } catch (e) {
+        grid.innerHTML = `<div class="empty-state"><h3>Could not load games</h3></div>`;
     }
+}
 
     function renderCard(game, index) {
       const hue = HUES[index % HUES.length];
@@ -527,8 +525,14 @@
     }
 
     async function openEditModal(id) {
+    const token = localStorage.getItem('token');
+
       try {
-        const res = await fetch(`${API}/games/${id}`);
+        const res = await fetch('/games/${id}', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
         const game = await res.json();
         document.getElementById('modalTitle').textContent = 'Edit Game';
         document.getElementById('editGameId').value = game.id;
@@ -562,6 +566,7 @@
     }
 
     async function submitGame() {
+        console.log('Token:', localStorage.getItem('token'));
       clearErrors();
       const id = document.getElementById('editGameId').value;
       const name = document.getElementById('gameName').value.trim();
@@ -583,7 +588,10 @@
       try {
         const res = await fetch(url, {
           method,
-          headers: { 'Content-Type': 'application/json' },
+           headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
           body: JSON.stringify(payload)
         });
 
@@ -604,7 +612,10 @@
     async function deleteGame(id, name) {
       if (!confirm(`Delete "${name}" from your library?`)) return;
       try {
-        await fetch(`${API}/games/${id}`, { method: 'DELETE' });
+        await fetch(`/games/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+        });
         showToast(`${name} removed from library`);
         loadGames();
       } catch (e) {

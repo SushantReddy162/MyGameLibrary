@@ -31,8 +31,7 @@ public class AuthService {
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
-        System.out.println("Username: " + request.getUsername());
-        System.out.println("Password: " + request.getPassword());
+
         return "user registered successfully";
     }
 
