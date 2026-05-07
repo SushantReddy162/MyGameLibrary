@@ -429,6 +429,7 @@
 
         try {
             const token = localStorage.getItem('token');
+            console.log('Token being sent:', localStorage.getItem('token'));
             const response = await fetch('/ai/chat', {
                 method: 'POST',
                 headers: {
