@@ -470,6 +470,11 @@
       setTimeout(() => t.className = 'toast', 3000);
     }
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login.html';
+    }
+
     async function loadGames() {
     const grid = document.getElementById('gamesGrid');
     const token = localStorage.getItem('token');
